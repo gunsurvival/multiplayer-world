@@ -1,0 +1,38 @@
+{
+  "name": "2d-multiplayer-world",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Library for 2d multiplayer game",
+  "author": "Đậu Khoa <khoakomlem@gmail.com>",
+  "repository": "https://github.com/khoakomlem/2d-multiplayer-world",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc --project ./tsconfig.json --noEmit",
+    "format": "eslint --fix ."
+  },
+  "dependencies": {
+    "@types/uniqid": "^5.3.4",
+    "colyseus": "^0.15.15",
+    "detect-collisions": "^9.2.3",
+    "lodash": "^4.17.21",
+    "pixi.js": "^7.4.0",
+    "stats.js": "^0.17.0",
+    "uniqid": "^5.4.0"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.11.16",
+    "@types/stats.js": "^0.17.3",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-xo": "^0.44.0",
+    "eslint-config-xo-typescript": "^2.0.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}

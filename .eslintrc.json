@@ -1,0 +1,50 @@
+{
+  "extends": ["xo", "xo-typescript/space", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-empty-function": "warn",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/triple-slash-reference": "off",
+        "capitalized-comments": "off",
+        "prettier/prettier": [
+          "error",
+          {
+            "editorconfig": true,
+            "singleQuote": true,
+            "jsxSingleQuote": true,
+            "trailingComma": "es5",
+            "importOrder": [
+              "<THIRD_PARTY_MODULES>",
+              "",
+              "^@/world/(.*)$",
+              "^@/effect/(.*)$",
+              "^@/entity/(.*)$",
+              "^@/player/(.*)$",
+              "^@/types/(.*)$",
+              "^(@/constants/(.*)$)|^(@/constants$)",
+              "^(@/utils/(.*)$)|^(@/utils$)",
+              "",
+              "^[./]"
+            ],
+            "importOrderSeparation": false,
+            "importOrderSortSpecifiers": true,
+            "importOrderBuiltinModulesToTop": true,
+            "importOrderParserPlugins": ["typescript", "decorators-legacy"],
+            "importOrderMergeDuplicateImports": true,
+            "importOrderCombineTypeAndValueImports": true,
+            "plugins": ["@ianvs/prettier-plugin-sort-imports"]
+          }
+        ]
+      }
+    }
+  ],
+  "plugins": ["prettier"],
+  "ignorePatterns": ["/*", "!src", "!/*.js", "!/*.cjs"],
+  "root": true
+}
