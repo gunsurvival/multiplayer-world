@@ -57,7 +57,7 @@ type DefaultHandler = EventHandler<any[]>;
  * An events map is an interface that maps event names to their value, which
  * represents the type of the `on` listener.
  */
-type EventsMap = Record<string, DefaultHandler>;
+export type EventsMap = Record<string, DefaultHandler>;
 
 /**
  * Returns a union type containing all the keys of an event map.

@@ -1,3 +1,1 @@
-export * from './WorldCore';
-export * from './WorldClient';
-export * from './WorldServer';
+export * from './entity-world';

@@ -6,5 +6,5 @@ export abstract class WorldServer {
   constructor(public worldCore: WorldCore) {}
   init() {}
 
-  nextTick(_tickData: TickData) {}
+  nextTick(tickData: TickData) {}
 }

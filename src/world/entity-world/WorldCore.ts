@@ -1,6 +1,6 @@
 import { System, type Body, type Response } from 'detect-collisions';
 
-import { type EntityCore } from '@/entity/EntityCore';
+import { type EntityCore } from '@/world/entity-world/entity/EntityCore';
 import { type EventData } from '@/types/EventData';
 import { type TickData } from '@/types/TickData';
 import { AsyncEE } from '@/utils/AsyncEE';
@@ -21,16 +21,17 @@ export abstract class WorldCore {
 
     this.entities.forEach((entity: EntityCore, id) => {
       if (entity.markAsRemove) {
-        this.addEvent('api:-entities', id).catch(console.error);
+        this.ee.emit('api:-entities', id).catch(console.error);
         return;
       }
 
       entity.beforeNextTick(tickData);
       entity.nextTick(tickData);
 
-      entity.bodies.forEach((body) => {
-        this.system.updateBody(body);
-        this.system.checkOne(body, ({ ...response }: ResponseBodyRefEntity) => {
+      this.system.updateBody(entity.body);
+      this.system.checkOne(
+        entity.body,
+        ({ ...response }: ResponseBodyRefEntity) => {
           const entityA = response.a.entityRef;
           const entityB = response.b.entityRef;
 
@@ -50,8 +51,8 @@ export abstract class WorldCore {
               entityA.ee.emit('collision-enter', entityB).catch(console.error);
             }
           }
-        });
-      });
+        }
+      );
     });
     this.collisionHashMap.forEach(
       (response: ResponseBodyRefEntity, uniq: string) => {
@@ -69,38 +70,16 @@ export abstract class WorldCore {
     );
   }
 
-  async addEvent<Ev extends keyof WorldEventMap>(
-    type: Ev,
-    ...args: Parameters<WorldEventMap[Ev]>
-  ) {
-    if (this.isOnline) {
-      // ignore history events when online, only server world core can
-      return;
-    }
-
-    const event: EventData = { type, args };
-    this.events.push(event);
-    this.ee.emit('+events', event).catch(console.error);
-    const values = await this.ee.emit(type, ...args);
-    return values[0];
-  }
-
   async add(entityCore: EntityCore) {
-    entityCore.bodies.forEach((body) => {
-      this.system.insert(body);
-    });
+    this.system.insert(entityCore.body);
     this.entities.set(entityCore.id, entityCore);
-    entityCore.bodies.forEach((body) => {
-      (body as BodyRefEntity).entityRef = entityCore;
-    });
+    (entityCore.body as BodyRefEntity).entityRef = entityCore;
     // Need to reference the entity's id in the body because the body is passed to the System.checkOne callback, not the entity
     await this.ee.emit('+entities', entityCore).catch(console.error);
   }
 
   remove(entityCore: EntityCore) {
-    entityCore.bodies.forEach((body) => {
-      this.system.remove(body);
-    });
+    this.system.remove(entityCore.body);
     this.entities.delete(entityCore.id);
     this.ee.emit('-entities', entityCore).catch(console.error);
   }

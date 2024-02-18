@@ -1,25 +1,30 @@
+import { Module } from '@/module';
 import { SATVector, type Body, type Response } from 'detect-collisions';
 import uniqid from 'uniqid';
 
-import { type WorldCore } from '@/world/WorldCore';
-import { type Effect } from '@/effect/Effect';
+import { type Effect } from '@/world/entity-world/effect/Effect';
+import { type WorldCore } from '@/world/entity-world/WorldCore';
 import { type TickData } from '@/types/TickData';
 import { AsyncEE } from '@/utils/AsyncEE';
 
-export abstract class EntityCore {
+export abstract class EntityCore extends Module {
   id = uniqid();
   markAsRemove = false;
   ee = new AsyncEE<EntityEventMap>();
   velocity = new SATVector(0, 0);
 
-  bodies = new Array<Body>();
+  abstract body: Body;
+  abstract stats: Record<string, unknown>;
+  abstract _stats: Record<string, unknown>;
 
-  constructor(public worldCore: WorldCore) {}
+  constructor(public worldCore: WorldCore) {
+    super();
+  }
 
   init(data: Record<string, unknown> = {}) {}
 
   beforeNextTick(tickData: TickData) {
-    this.bodies.forEach((body) => body.pos.add(this.velocity));
+    this.body.pos.add(this.velocity);
   }
 
   nextTick(tickData: TickData) {}

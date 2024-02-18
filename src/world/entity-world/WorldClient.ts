@@ -1,8 +1,8 @@
 import { Application, type DisplayObject } from 'pixi.js';
 
-import { type WorldCore } from '@/world/WorldCore';
-import { type EntityClient } from '@/entity/EntityClient';
-import { type EntityCore } from '@/entity/EntityCore';
+import { type EntityClient } from '@/world/entity-world/entity/EntityClient';
+import { type EntityCore } from '@/world/entity-world/entity/EntityCore';
+import { type WorldCore } from '@/world/entity-world/WorldCore';
 import { type TickData } from '@/types/TickData';
 
 export abstract class WorldClient {

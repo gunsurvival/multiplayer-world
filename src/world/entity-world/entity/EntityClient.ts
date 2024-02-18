@@ -1,6 +1,6 @@
 import { type DisplayObject } from 'pixi.js';
 
-import { type WorldClient } from '@/world/WorldClient';
+import { type WorldClient } from '@/world/entity-world/WorldClient';
 import { type TickData } from '@/types/TickData';
 
 import { type EntityCore } from './EntityCore';
@@ -20,9 +20,9 @@ export abstract class EntityClient {
 
   nextTick(tickData: TickData) {
     this.displayObjects.forEach((displayObject, index) => {
-      displayObject.x = this.entityCore.bodies[index].pos.x;
-      displayObject.y = this.entityCore.bodies[index].pos.y;
-      displayObject.rotation = this.entityCore.bodies[index].angle;
+      displayObject.x = this.entityCore.body.pos.x;
+      displayObject.y = this.entityCore.body.pos.y;
+      displayObject.rotation = this.entityCore.body.angle;
     });
   }
 }
