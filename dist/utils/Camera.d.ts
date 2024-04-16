@@ -12,3 +12,4 @@ export declare class Camera {
     update(): void;
     shake(amount: number): void;
 }
+//# sourceMappingURL=Camera.d.ts.map

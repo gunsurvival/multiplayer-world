@@ -4,3 +4,4 @@ export type TickData = {
     deltaMs: number;
     delta: number;
 };
+//# sourceMappingURL=TickData.d.ts.map

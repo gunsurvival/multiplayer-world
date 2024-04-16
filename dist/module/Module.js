@@ -12,26 +12,52 @@ import uniqid from 'uniqid';
 import { EventData, EventSchema } from "../types/EventData";
 import { AsyncEE } from "../utils/AsyncEE";
 export class Module extends Schema {
-    static create(value) {
-        const obj = new this(value);
-        obj.init(value);
-        return obj;
+    constructor() {
+        super(...arguments);
+        this.id = uniqid();
+        this.events = new ArraySchema();
+        this.ee = new AsyncEE();
     }
-    events = new ArraySchema();
-    ee = new AsyncEE();
-    roomClient;
-    roomServer;
-    stateServer;
-    stateClient;
-    constructor(roomProps) {
-        super();
-        this.initEvent(roomProps);
+    initServer(state) {
+        this.stateServer = state;
+        const unbindId = this.stateServer.listen('id', (id) => {
+            if (typeof id === 'string') {
+                this.id = id;
+                unbindId();
+            }
+        }, false);
+        const unbindEvents = this.stateServer.listen('events', (events) => {
+            unbindEvents();
+            events.onAdd((eventServer) => {
+                const event = new EventData({
+                    id: eventServer.id,
+                    name: eventServer.name,
+                    args: JSON.parse(eventServer.args),
+                });
+                this.ee.emit('+events', event).catch(console.error);
+            });
+        }, false);
+    }
+    initEvent({ roomClient, roomServer }) {
+        if (roomClient) {
+        }
+        else if (roomServer) {
+            roomServer.onMessage('+events', (client, event) => {
+                if (event.id !== this.id)
+                    return;
+                this.ee.emit('+events', event).catch(console.error);
+            });
+            this.ee.on('+events', (event) => {
+                console.log(event);
+                this.serverPushEvent(event);
+            });
+        }
         this.ee.on('+events', (event) => {
             if (event.name) {
                 const [type, name] = event.name.split(':');
                 if (type === 'rpc') {
-                    if (Object.hasOwn(this, name)) {
-                        this[name](event.args);
+                    if (typeof this[name] === 'function') {
+                        this[name](...event.args);
                     }
                     else {
                         console.error(`RPC method not found: ${name}`);
@@ -43,51 +69,42 @@ export class Module extends Schema {
             }
         });
     }
-    init(data) { }
-    initEvent({ roomClient, roomServer }) {
-        if (roomClient) {
-            this.roomClient = roomClient;
-            this.roomClient.state.events.onAdd((eventServer, key) => {
-                const event = new EventData({
-                    id: eventServer.id,
-                    name: eventServer.name,
-                    args: JSON.parse(eventServer.args),
-                });
-                this.ee.emit('+events', event).catch(console.error);
-            });
+    sendEvent(event) {
+        if (this.helper?.roomClient) {
         }
-        else if (roomServer) {
-            this.roomServer = roomServer;
-            this.roomServer.onMessage('+events', (client, event) => {
-                this.ee.emit('+events', event).catch(console.error);
-            });
-            this.ee.on('+events', (event) => {
-                this.sendEvent(event);
-            });
+        else if (this.helper?.roomServer) {
+            this.ee.emit('+events', event).catch(console.error);
         }
     }
-    sendEvent(event) {
-        if (this.roomClient) {
-            this.roomClient.send('+events', event);
-        }
-        else if (this.roomServer) {
-            this.events.push(new EventSchema({
-                id: uniqid(),
-                name: event.name,
-                args: JSON.stringify(event.args),
-            }));
-        }
+    serverPushEvent(event) {
+        this.events.push(new EventSchema().assign({
+            id: this.id,
+            name: event.name,
+            args: JSON.stringify(event.args),
+        }));
     }
     isServerAttached() {
         return Boolean(this.stateServer);
     }
     isClientSide() {
-        return !this.roomServer;
+        return Boolean(this?.helper.roomClient);
+    }
+    isServerSide() {
+        return Boolean(this?.helper.roomServer);
+    }
+    isPlayOffline() {
+        return this.isClientSide() && !this.isServerAttached();
     }
     clientOnly(func) {
-        return this.isClientSide() ? func?.() : undefined;
+        return undefined;
     }
+    init(data) { }
+    async initClient() { }
 }
+__decorate([
+    type('string'),
+    __metadata("design:type", Object)
+], Module.prototype, "id", void 0);
 __decorate([
     type([EventSchema]),
     __metadata("design:type", Object)

@@ -3,34 +3,36 @@ import { ArraySchema, Schema } from '@colyseus/schema';
 import { type Room as RoomClient } from 'colyseus.js';
 import { EventData, EventSchema } from '@/types/EventData';
 import { AsyncEE } from '@/utils/AsyncEE';
+import { type ModuleHelper } from './ModuleHelper';
 type RoomProps = {
-    roomClient: RoomClient<Module>;
-    roomServer: undefined;
-} | {
-    roomClient: undefined;
-    roomServer: RoomServer<Module>;
+    roomClient?: RoomClient<Module>;
+    roomServer?: RoomServer<Module>;
 };
 export declare abstract class Module extends Schema {
-    static create<T extends typeof Module>(this: T, value: {
-        roomClient?: RoomClient;
-        roomServer?: any;
-    } & (Parameters<InstanceType<T>['init']>[0] extends void ? Record<string, unknown> : Parameters<InstanceType<T>['init']>[0])): InstanceType<T>;
+    id: string;
     events: ArraySchema<EventSchema>;
     ee: AsyncEE<{
         '+events': (event: EventData) => void;
     }>;
-    roomClient?: RoomClient<Module>;
-    roomServer?: RoomServer<Module>;
-    stateServer?: Schema;
-    stateClient?: Record<string, any>;
-    constructor(roomProps: RoomProps);
-    init(data: Record<string, unknown>): void;
+    stateServer?: typeof this;
+    stateClient?: Awaited<ReturnType<this['initClient']>>;
+    helper: ModuleHelper;
+    awatingClientState?: Promise<any>;
+    initServer(state: Schema): void;
     initEvent({ roomClient, roomServer }: RoomProps): void;
     sendEvent(event: EventData): void;
+    serverPushEvent(event: EventData): void;
     isServerAttached(): boolean;
     isClientSide(): this is {
-        stateClient: Record<string, unknown>;
+        stateClient: Record<string, any>;
     };
-    clientOnly<T>(func?: () => T): T | undefined;
+    isServerSide(): this is {
+        stateServer: Record<string, unknown>;
+    };
+    isPlayOffline(): boolean;
+    clientOnly<T>(func: () => T | Promise<T>): T | undefined;
+    init(data: Record<string, unknown>): void;
+    initClient(): Promise<any>;
 }
 export {};
+//# sourceMappingURL=Module.d.ts.map

@@ -13,8 +13,11 @@ import { Schema, type } from '@colyseus/schema';
 import { WebSocketTransport } from '@colyseus/ws-transport';
 import express from 'express';
 class MySchema extends Schema {
-    str = '';
-    num = 0;
+    constructor() {
+        super(...arguments);
+        this.str = '';
+        this.num = 0;
+    }
 }
 __decorate([
     type('string'),

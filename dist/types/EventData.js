@@ -10,10 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 import { Schema, type } from '@colyseus/schema';
 import uniqid from 'uniqid';
 export class EventData {
-    id = uniqid();
-    name = '';
-    args = [];
     constructor(data) {
+        this.id = uniqid();
+        this.name = '';
+        this.args = [];
         this.assign(data);
     }
     assign(data) {
@@ -22,10 +22,13 @@ export class EventData {
     }
 }
 export class EventSchema extends Schema {
-    id = '';
-    class = '';
-    name = 'UnknownEvent';
-    args = '[]';
+    constructor() {
+        super(...arguments);
+        this.id = '';
+        this.class = '';
+        this.name = 'UnknownEvent';
+        this.args = '[]';
+    }
 }
 __decorate([
     type('string'),

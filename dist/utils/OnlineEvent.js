@@ -1,6 +1,8 @@
 import uniqid from 'uniqid';
 export class OnlineEvent {
-    items = new Array();
+    constructor() {
+        this.items = new Array();
+    }
     push(eventName, ...args) {
         this.items.push({
             id: uniqid(),

@@ -8,3 +8,4 @@ export type OnlineEventData = {
     name: string;
     args: any[];
 };
+//# sourceMappingURL=OnlineEvent.d.ts.map

@@ -12,3 +12,4 @@ export declare class EventSchema extends Schema {
     name: string;
     args: string;
 }
+//# sourceMappingURL=EventData.d.ts.map

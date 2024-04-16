@@ -1,5 +1,7 @@
 export class AsyncEE {
-    eventHandlers = new Map();
+    constructor() {
+        this.eventHandlers = new Map();
+    }
     on(event, handler) {
         const eventHandlers = this.eventHandlers.get(event) ?? [];
         eventHandlers.push(handler);

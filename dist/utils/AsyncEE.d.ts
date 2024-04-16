@@ -10,3 +10,4 @@ export type EventsMap = Record<string, DefaultHandler>;
 type EventNames<Map extends EventsMap> = keyof Map & string;
 type EventHandler<Params extends any[]> = (...args: Params) => unknown;
 export {};
+//# sourceMappingURL=AsyncEE.d.ts.map

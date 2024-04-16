@@ -1,12 +1,11 @@
 import SAT from 'sat';
 import { lerp } from './common';
 export class Camera {
-    stage;
-    pos = new SAT.Vector(0, 0);
-    angle = 0;
-    followingPos = new SAT.Vector(0, 0);
     constructor(stage) {
         this.stage = stage;
+        this.pos = new SAT.Vector(0, 0);
+        this.angle = 0;
+        this.followingPos = new SAT.Vector(0, 0);
     }
     get x() {
         return this.pos.x;

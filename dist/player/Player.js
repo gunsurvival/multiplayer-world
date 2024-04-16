@@ -1,15 +1,23 @@
 import { AsyncEE } from "../utils/AsyncEE";
 export class Player {
+    constructor() {
+        this.ee = new AsyncEE();
+    }
     static create(value) {
         const obj = new this();
-        obj.init();
-        if (value) {
-            obj.initServer(value);
+        if (value.roomClient) {
+            obj.initClient(value.roomClient);
         }
+        obj.init();
         return obj;
     }
-    ee = new AsyncEE();
-    core;
+    static initServer(room) {
+        room.onMessage('*', (client, type, message) => {
+            client.userData?.player.ee
+                .emit(String(type), message)
+                .catch(console.error);
+        });
+    }
     isReady() {
         return this.core !== undefined;
     }
@@ -17,8 +25,8 @@ export class Player {
         this.core = core;
     }
     init() { }
-    initServer(room) {
-        room.onMessage('*', (client, type, message) => {
+    initClient(room) {
+        room.onMessage('*', (type, message) => {
             this.ee.emit(String(type), message).catch(console.error);
         });
     }

@@ -7,15 +7,24 @@ import { AsyncEE } from '@/utils/AsyncEE';
 export class Player {
   static create<T extends typeof Player>(
     this: T,
-    value?: RoomServer
+    value: { roomClient?: RoomClient }
   ): InstanceType<T> {
     const obj = new this() as InstanceType<T>;
-    obj.init();
-    if (value) {
-      obj.initServer(value);
+    if (value.roomClient) {
+      obj.initClient(value.roomClient);
     }
 
+    obj.init();
     return obj;
+  }
+
+  static initServer(room: RoomServer) {
+    // Only call this once
+    room.onMessage('*', (client, type, message) => {
+      client.userData?.player.ee
+        .emit(String(type), message)
+        .catch(console.error);
+    });
   }
 
   ee = new AsyncEE();
@@ -31,9 +40,9 @@ export class Player {
 
   init() {}
 
-  // call at server
-  initServer(room: RoomServer) {
-    room.onMessage('*', (client, type, message) => {
+  initClient(room: RoomClient) {
+    room.onMessage('*', (type, message) => {
+      // console.log('receive', type, message);
       this.ee.emit(String(type), message).catch(console.error);
     });
   }
