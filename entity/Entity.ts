@@ -32,24 +32,23 @@ export abstract class Entity<
 
 	abstract prepare(options: Parameters<this["init"]>[0]): Promise<void>
 
-	init(
-		options: Partial<{
+	init(options: Record<string, any>): void {
+		const defaultOptions = options as Partial<{
 			pos: { x: number; y: number }
 			vel: { x: number; y: number }
 			rotation: number
 		}>
-	): void {
-		if (options.pos) {
-			this.pos.x = options.pos.x
-			this.pos.y = options.pos.y
+		if (defaultOptions.pos) {
+			this.pos.x = defaultOptions.pos.x
+			this.pos.y = defaultOptions.pos.y
 			if (this.body) this.body.setPosition(this.pos.x, this.pos.y)
 		}
-		if (options.vel) {
-			this.vel.x = options.vel.x
-			this.vel.y = options.vel.y
+		if (defaultOptions.vel) {
+			this.vel.x = defaultOptions.vel.x
+			this.vel.y = defaultOptions.vel.y
 		}
-		if (options.rotation) {
-			this.rotation = options.rotation
+		if (defaultOptions.rotation) {
+			this.rotation = defaultOptions.rotation
 		}
 	}
 
