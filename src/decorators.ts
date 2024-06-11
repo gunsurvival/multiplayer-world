@@ -11,7 +11,7 @@ export const serverHandlersMap = new Map<any, Map<string, Function>>()
 export const clientHandlersMap = new Map<any, Map<string, Function>>()
 export const controllerHandlersMap = new Map<any, Map<string, Function>>()
 
-export function Server({ skipSync = false, allowClient = false } = {}) {
+export function Server({ sync = false } = {}) {
 	// This decorator will make the method only run if the world is server side and send signal to call the method remotely on client side
 	// It's mean any method that has this decorator will treat as "dispatch" method to client
 	// Example creating a bullet, the bullet will be created on server (random data will be calculated on server)
@@ -40,7 +40,7 @@ export function Server({ skipSync = false, allowClient = false } = {}) {
 
 		descriptor.value = function (this: Schema, ...args: any[]) {
 			if (this instanceof Schema) {
-				if (this.world.isServerOnly() && !skipSync) {
+				if (this.world.isServerOnly() && sync) {
 					// If current world is in server side, send rpc method to client
 					// if (isPrivate) {
 					// 	//TODO: make this If the method is private, only send to the entity's client (who control the entity)
@@ -61,7 +61,7 @@ export function Server({ skipSync = false, allowClient = false } = {}) {
 				}
 			}
 
-			if (this.isServer || allowClient) {
+			if (this.isServer) {
 				// console.log(propertyKey, args, this)
 				return originalMethod.bind(this)(...args)
 			}

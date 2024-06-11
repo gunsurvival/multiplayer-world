@@ -1,10 +1,11 @@
+import { AsyncEE } from "../utils/AsyncEE"
 import { Schema as ColySchema, type } from "@colyseus/schema"
 import uniqid from "uniqid"
 
-import { Client } from "colyseus"
+import type { Client } from "colyseus"
 import { getHandlers, serverHandlersMap } from "../decorators"
 import type { World } from "../world/World"
-import { AsyncEE } from "@/lib/AsyncEE"
+import { safeGenId } from "../utils/safeGenId"
 
 export class Schema<TWorld extends World = World> extends ColySchema {
 	___: {
@@ -12,7 +13,7 @@ export class Schema<TWorld extends World = World> extends ColySchema {
 		world: TWorld
 	} = {} as any
 
-	@type("string") id: string = uniqid()
+	@type("uint32") id: number = safeGenId()
 
 	eventHandlers = new Map<string, Function[]>()
 	serverState: typeof this | undefined
@@ -178,8 +179,8 @@ export class Schema<TWorld extends World = World> extends ColySchema {
 		)
 	}
 
-	getSnapshot(): Record<string, any> {
-		return {}
+	getSnapshot(): Record<string, any> | undefined {
+		return
 	}
 
 	get isClient() {

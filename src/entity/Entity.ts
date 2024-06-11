@@ -1,29 +1,22 @@
-import uniqid from "uniqid"
-import { Schema, type } from "@/lib/multiplayer-world/schema"
-import { Vec2 } from "../schema/Vec2"
-import { Server } from "@/lib/multiplayer-world/decorators"
-import * as Controllers from "@/core/controller"
-import { ServerController } from "@/lib/multiplayer-world/ServerController"
+import { Schema, type, Vec2 } from "@/schema"
+import { Server } from "@/decorators"
+import { ServerController } from "@/ServerController"
 import { Body } from "detect-collisions"
-import { World } from "../world/World"
-import type { SerializedResponse } from "../utils/dectect-collisions"
-import { lerp, lerpAngle } from "@/core/utils/common"
-import { Rock } from "@/core/entity"
+import { World } from "@/world/World"
+import type { SerializedResponse } from "@/utils/dectect-collisions"
+import { lerp, lerpAngle } from "@/utils/smooth"
+import { safeGenId } from "@/utils/safeGenId"
 
 export abstract class Entity<
 	TWorld extends World = World
 > extends Schema<TWorld> {
-	body: Body | undefined
 	@type(Vec2) pos = new Vec2()
-	@type(Vec2) vel = new Vec2()
 	@type("float32") rotation = 0
+	body: Body | undefined
+	vel = new Vec2()
 	friction = 0.91
 	readyToRender = false
 	controller: ServerController | undefined
-	controllerRegistry = new Map<string, typeof ServerController>(
-		Object.entries(Controllers) as any
-	)
-
 	markAsRemoved = false
 
 	get isControlling() {
@@ -32,7 +25,7 @@ export abstract class Entity<
 
 	abstract prepare(options: Parameters<this["init"]>[0]): Promise<void>
 
-	init(options: Record<string, any>): void {
+	init(options: Record<string, any> = {}): void {
 		const defaultOptions = options as Partial<{
 			pos: { x: number; y: number }
 			vel: { x: number; y: number }
@@ -69,8 +62,8 @@ export abstract class Entity<
 	reconcileServerState(serverState: typeof this) {
 		this.pos.x = lerp(this.pos.x, serverState.pos.x, 0.1)
 		this.pos.y = lerp(this.pos.y, serverState.pos.y, 0.1)
-		this.vel.x = lerp(this.vel.x, serverState.vel.x, 0.1)
-		this.vel.y = lerp(this.vel.y, serverState.vel.y, 0.1)
+		// this.vel.x = lerp(this.vel.x, serverState.vel.x, 0.1)
+		// this.vel.y = lerp(this.vel.y, serverState.vel.y, 0.1)
 		this.rotation = lerpAngle(this.rotation, serverState.rotation, 0.1)
 	}
 
@@ -78,15 +71,15 @@ export abstract class Entity<
 	finalizeTick(deltaTime: number) {}
 	nextTick(deltaTime: number) {}
 
-	@Server({ skipSync: true })
+	@Server()
 	addController(className: string, options: {}) {
-		const id = uniqid()
+		const id = safeGenId()
 		return this.addControllerById(id, className, options)
 	}
 
 	// @Server({ isPrivate: true })
 	@Server()
-	addControllerById(id: string, className: string, options: {}) {
+	addControllerById(id: number, className: string, options: {}) {
 		const controllerClass = this.controllerRegistry.get(className)
 		if (!controllerClass) {
 			throw new Error(`Controller class "${className}" not found!`)
@@ -121,15 +114,15 @@ export abstract class Entity<
 	}
 
 	@Server()
-	onCollisionEnter(otherId: string, response: SerializedResponse) {}
+	onCollisionEnter(otherId: number, response: SerializedResponse) {}
 
 	// Dont use server decorator here (lack of datapack)
-	onCollisionStay(otherId: string, response: SerializedResponse) {}
+	onCollisionStay(otherId: number, response: SerializedResponse) {}
 
 	@Server()
-	onCollisionExit(otherId: string, response: SerializedResponse) {}
+	onCollisionExit(otherId: number, response: SerializedResponse) {}
 
-	@Server()
+	@Server({ sync: true })
 	destroy() {
 		this.markAsRemoved = true
 	}

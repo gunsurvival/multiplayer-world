@@ -4,10 +4,14 @@ import type { PixiWorld } from "../world/PixiWorld"
 import { getZIndexByName } from "@/core/settings"
 import { Client, Server } from "../decorators"
 
-export abstract class PixiEntity extends Entity<PixiWorld> {
+type Test = {
+	prepare: (options: Parameters<Entity["init"]>[0]) => Promise<void>
+}
+
+export abstract class PixiEntity extends Entity<PixiWorld> implements Test {
 	abstract display: Container | undefined
 
-	async prepare(options: Parameters<this["init"]>[0]): Promise<void> {
+	async prepare(options: Parameters<this["init"]>[0] = {}): Promise<void> {
 		if (this.display) {
 			if (options.pos) {
 				this.display.x = options.pos.x
@@ -48,7 +52,6 @@ export abstract class PixiEntity extends Entity<PixiWorld> {
 		}
 	}
 
-	@Server({ allowClient: true })
 	destroy(): void {
 		if (this.isClient && this.display) {
 			this.world.viewport.removeChild(this.display)
@@ -56,7 +59,7 @@ export abstract class PixiEntity extends Entity<PixiWorld> {
 		this.markAsRemove()
 	}
 
-	@Server()
+	@Server({ sync: true })
 	markAsRemove() {
 		this.markAsRemoved = true
 	}

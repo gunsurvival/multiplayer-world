@@ -11,11 +11,12 @@ import { ServerController } from "../ServerController"
 import { MapSchema, type } from "../schema"
 import { Entity } from "../entity/Entity"
 import { BodyRefEntity } from "../utils/dectect-collisions"
+import { safeGenId } from "../utils/safeGenId"
 
 export abstract class World extends Schema {
 	frameCount = 0
-	__holderMap = new Map<string, Schema>() // holding schema at client
-	__schemaMap = new Map<string, Schema>() // holding schema at both
+	__holderMap = new Map<Schema["id"], Schema>() // holding schema at client
+	__schemaMap = new Map<Schema["id"], Schema>() // holding schema at both
 	__isServer = false
 	__isClient = false
 
@@ -71,7 +72,7 @@ export abstract class World extends Schema {
 
 	init(
 		options: Partial<{
-			entities: [string, string, ReturnType<Entity["getSnapshot"]>][]
+			entities: [string, number, ReturnType<Entity["getSnapshot"]>][]
 		}>
 	) {
 		if (options.entities) {
@@ -88,7 +89,7 @@ export abstract class World extends Schema {
 				entity.constructor.name,
 				entity.id,
 				entity.getSnapshot(),
-			]) as [string, string, ReturnType<Entity["getSnapshot"]>][],
+			]) as [string, number, ReturnType<Entity["getSnapshot"]>][],
 		}
 	}
 
@@ -103,24 +104,24 @@ export abstract class World extends Schema {
 		}
 	}
 
-	@Server({ skipSync: true })
+	@Server()
 	// Why skipSync: we are just create id on server side to make sure both client and server have the same id (passing to addEntityById)
 	// So we don't need to sync this line to client as the addEntityById will be skipped on client side (because it's server only)
 	async addEntity(
 		className: string,
-		options: {}
+		options?: {}
 		// options: Parameters<
 		// 	(typeof Entities)[ClassName] extends typeof Entity
 		// 		? InstanceType<(typeof Entities)[ClassName]>["init"]
 		// 		: (options: {}) => any
 		// >[0]
 	) {
-		const id = uniqid()
+		const id = safeGenId()
 		return this.addEntityById(id, className, options)
 	}
 
-	@Server()
-	addEntityById(id: string, className: string, options: {}) {
+	@Server({ sync: true })
+	addEntityById(id: number, className: string, options?: {}) {
 		const entityClass = this.entityRegistry.get(className)
 		if (!entityClass) {
 			throw new Error(
@@ -166,7 +167,7 @@ export abstract class World extends Schema {
 		return entity
 	}
 
-	@Server({ skipSync: true })
+	@Server()
 	removeEntity(entity: Entity | Entity[]) {
 		const entities = Array.isArray(entity) ? entity : [entity]
 		entities.forEach((entity) => {
@@ -176,7 +177,7 @@ export abstract class World extends Schema {
 	}
 
 	@Server()
-	removeEntityById(id: string | string[]) {
+	removeEntityById(id: number | number[]) {
 		const ids = Array.isArray(id) ? id : [id]
 		ids.forEach((id) => {
 			const entity = this.entities.get(id)

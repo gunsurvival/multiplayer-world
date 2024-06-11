@@ -1,8 +1,6 @@
-import { Application, Text } from "pixi.js"
+import { type Application, Text } from "pixi.js"
 import { CasualWorld } from "./CasualWorld"
-import { Delayed } from "colyseus"
-import { Viewport } from "pixi-viewport"
-import { Camera } from "../utils/Camera"
+import { Camera } from "../../../gunsurvival3/src/core/utils/Camera"
 
 export class PixiWorld extends CasualWorld {
 	app = this.clientOnly(() => new Application())

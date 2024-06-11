@@ -8,11 +8,19 @@ export class MapSchema<T = any> extends ColyMapSchema<T> {
 		world: World
 	} = {} as any
 
-	set(key: string, value: T): this {
+	set(key: string | number, value: T): this {
 		if (isSchemaType(value)) {
 			addWorldRecursive(value, this.___.world)
 		}
 
-		return super.set(key, value)
+		return super.set(String(key), value)
+	}
+
+	get(key: string | number) {
+		return super.get(String(key))
+	}
+
+	delete(key: string | number) {
+		return super.delete(String(key))
 	}
 }

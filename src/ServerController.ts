@@ -7,7 +7,7 @@ export class ServerController<Target extends Schema = Schema> {
 	}
 
 	constructor(
-		public id: string,
+		public id: number,
 		public target: Target // public clientOnServer?: ClientOnServer<UserData>
 	) {}
 

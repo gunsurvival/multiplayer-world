@@ -16,16 +16,15 @@ export abstract class CasualWorld extends World {
 	finalizeTick(entity: Entity, delta: number) {
 		entity.finalizeTick(delta)
 
-		if (entity.vel.len() > 0.01) {
+		if (entity.vel.len() > 0.1) {
+			// skip small movements for performance
 			entity.pos.x += entity.vel.x
 			entity.pos.y += entity.vel.y
+			// entity.vel.x *= entity.friction
+			entity.vel.y = Number((entity.vel.y * entity.friction).toFixed(2))
+			entity.vel.x = Number((entity.vel.x * entity.friction).toFixed(2))
 		}
 		entity.body?.setPosition(entity.pos.x, entity.pos.y)
-
-		if (entity.vel.len() > 0.01) {
-			entity.vel.x *= entity.friction
-			entity.vel.y *= entity.friction
-		}
 	}
 
 	nextTick(delta: number): void {
