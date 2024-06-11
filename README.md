@@ -1,15 +1,11 @@
-# multiplayer-world
+# THIS LIBRARY IS NOT READY TO PRODUDCTION
 
-To install dependencies:
+This library is an abstract on [colysus/schema](https://github.com/colyseus/schema) provide new way of creating multiplayer games
 
-```bash
-bun install
-```
+## Goal
 
-To run:
+The main goal is provide a good solution of syncing game world between client & server or you can understand this library help transfrom an single player game into an authorized multiplayer game with decorators (and some if-else if it is application-specific xD)!!
 
-```bash
-bun run src/index.ts
-```
+## How it works
 
-This project was created using `bun init` in bun v1.1.10. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+to be continue....
