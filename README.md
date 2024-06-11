@@ -1,4 +1,4 @@
-# THIS LIBRARY IS NOT READY TO PRODUDCTION
+# THIS LIBRARY IS NOT READY FOR PRODUDCTION
 
 This library is an abstract on [colysus/schema](https://github.com/colyseus/schema) provide new way of creating multiplayer games
 
