@@ -1,4 +1,3 @@
-import uniqid from "uniqid"
 import { System, type Response } from "detect-collisions"
 import { Room as RoomServer } from "@colyseus/core"
 import { Room as RoomClient } from "colyseus.js"
@@ -10,20 +9,21 @@ import { Server } from "../decorators"
 import { ServerController } from "../ServerController"
 import { MapSchema, type } from "../schema"
 import { Entity } from "../entity/Entity"
-import { BodyRefEntity } from "../utils/dectect-collisions"
+import type { BodyRefEntity } from "../utils/dectect-collisions"
 import { safeGenId } from "../utils/safeGenId"
+import { RPCPacket } from "@/types/RPCPacket"
 
 export abstract class World extends Schema {
-	frameCount = 0
+	@type({ map: Entity }) entities = new MapSchema<Entity>()
+
+	room?: RoomServer | RoomClient
 	__holderMap = new Map<Schema["id"], Schema>() // holding schema at client
 	__schemaMap = new Map<Schema["id"], Schema>() // holding schema at both
 	__isServer = false
 	__isClient = false
 
-	@type({ map: Entity }) entities = new MapSchema<Entity>()
-
 	clientState = {}
-	room?: RoomServer | RoomClient
+	frameCount = 0
 	entityRegistry = new Map<string, typeof Entity>()
 	controllerRegistry = new Map<string, typeof ServerController>()
 
@@ -258,11 +258,12 @@ export abstract class World extends Schema {
 					"snapshot",
 					(snapshot: ReturnType<this["getSnapshot"]>) => {
 						this.init(snapshot)
-						console.log("snapshot", snapshot)
+						console.log("snapshot", JSON.stringify(snapshot))
 						remove()
 						resolve(snapshot)
 					}
 				)
+				roomClient.send("get-snapshot")
 			})
 		}
 
@@ -276,47 +277,41 @@ export abstract class World extends Schema {
 		}
 
 		const setupRPC = () => {
-			return roomClient.onMessage<RPCRequest>("rpc", async (message) => {
+			return roomClient.onMessage<RPCPacket>("rpc", async (message) => {
+				const [id, method, args = []] = message
 				try {
 					// console.log("rpc", message)
 					// TODO: refactor this not to use waitFor, hook on holderMap adding event
-					await waitFor(() => this.__holderMap.has(message.id), {
-						waitForWhat: `holderMap has ${message.id}`,
+					await waitFor(() => this.__holderMap.has(id), {
+						waitForWhat: `holderMap has ${id}`,
 						timeoutMs: 5000,
 						immediate: true,
 						intervalMs: 10,
 					})
 
-					const clientSchema = this.__holderMap.get(message.id)!
+					const clientSchema = this.__holderMap.get(id)!
 					const handler =
-						clientSchema.serverHandlers.get(message.method) ||
-						clientSchema.clientHandlers.get(message.method) ||
-						(clientSchema[
-							message.method as keyof typeof clientSchema
-						] as Function)
+						clientSchema.serverHandlers.get(method) ||
+						clientSchema.clientHandlers.get(method) ||
+						(clientSchema[method as keyof typeof clientSchema] as Function)
 					if (!handler) {
-						throw new Error(`Handler not found for ${message.method}`)
+						throw new Error(`Handler not found for ${method}`)
 					}
 					if (!(handler instanceof Function)) {
-						throw new Error(`Handler "${message.method}" is not a function!`)
+						throw new Error(`Handler "${method}" is not a function!`)
 					}
 					// console.log(`CLIENT: Invoking ${message.method} with args:`, message.args);
 					clientSchema?.eventHandlers
-						.get(message.method)
-						?.forEach((handler) => handler.bind(clientSchema)(...message.args))
+						.get(method)
+						?.forEach((handler) => handler.bind(clientSchema)(...args))
 
-					handler.bind(clientSchema)(...message.args)
+					handler.bind(clientSchema)(...args)
 				} catch (error) {
-					console.error(
-						`RPC error for method "${message.method}":`,
-						message,
-						error
-					)
+					console.error(`RPC error for method "${method}":`, message, error)
 				}
 			})
 		}
 
-		roomClient.send("ready-to-get-snapshot")
 		await applySnapshot()
 		await pairing()
 		setupRPC()
@@ -325,30 +320,29 @@ export abstract class World extends Schema {
 
 	/** Run this setup on server */
 	setupClientRPC(roomServer: RoomServer) {
-		roomServer.onMessage<RPCRequest>(
+		roomServer.onMessage<RPCPacket>(
 			"rpc-controller",
 			async (client, message) => {
+				const [id, method, args = []] = message
 				try {
 					const controllers = client.userData?.controllers as
-						| Map<string, ServerController>
+						| Map<number, ServerController>
 						| undefined
-					const controller = controllers?.get(message.id)
+					const controller = controllers?.get(id)
 					if (!controller) {
-						throw new Error(
-							`Controller not found on client for id "${message.id}"`
-						)
+						throw new Error(`Controller not found on client for id "${id}"`)
 					}
 
-					const handler = controller.controllerHandlers.get(message.method)
+					const handler = controller.controllerHandlers.get(method)
 					if (!handler) {
 						throw new Error(
-							`Handler "${message.method}" not found on controller "${controller.constructor.name}"!`
+							`Handler "${method}" not found on controller "${controller.constructor.name}"!`
 						)
 					}
 					if (!(handler instanceof Function)) {
-						throw new Error(`Handler "${message.method}" is not a function!`)
+						throw new Error(`Handler "${method}" is not a function!`)
 					}
-					handler.bind(controller)(...message.args)
+					handler.bind(controller)(...args)
 				} catch (error) {
 					console.error("RPC error:", error)
 				}
@@ -372,10 +366,4 @@ export type WorldOptions = (
 	  }
 ) & {
 	entityClasses?: Record<string, typeof Entity<World>>
-}
-
-export type RPCRequest = {
-	id: string
-	method: string
-	args: any[]
 }

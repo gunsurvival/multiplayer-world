@@ -1,11 +1,10 @@
-import { AsyncEE } from "../utils/AsyncEE"
 import { Schema as ColySchema, type } from "@colyseus/schema"
-import uniqid from "uniqid"
 
 import type { Client } from "colyseus"
 import { getHandlers, serverHandlersMap } from "../decorators"
 import type { World } from "../world/World"
 import { safeGenId } from "../utils/safeGenId"
+import { AsyncEE } from "@/utils/AsyncEE"
 
 export class Schema<TWorld extends World = World> extends ColySchema {
 	___: {

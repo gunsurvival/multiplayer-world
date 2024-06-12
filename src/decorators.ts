@@ -1,5 +1,6 @@
 import { ServerController } from "./ServerController"
 import { Schema } from "./schema"
+import { RPCPacket } from "./types/RPCPacket"
 
 // unbuild handlers
 export const _serverHandlersMap = new Map<any, Record<string, Function>>()
@@ -52,11 +53,12 @@ export function Server({ sync = false } = {}) {
 					// 		})
 					// 	}
 					// } else {
-					this.world.room.broadcast("rpc", {
-						id: this.id,
-						method: propertyKey,
-						args,
-					})
+					const packet: RPCPacket = [
+						this.id,
+						propertyKey,
+						args.length ? args : undefined,
+					]
+					this.world.room.broadcast("rpc", packet)
 					// }
 				}
 			}
@@ -135,11 +137,12 @@ export function Controller({ serverOnly = false } = {}) {
 
 		descriptor.value = function (this: ServerController, ...args: any[]) {
 			if (this.target.world.isClientOnly()) {
-				this.target.world.room.send("rpc-controller", {
-					id: this.id,
-					method: propertyKey,
-					args,
-				})
+				const packet: RPCPacket = [
+					this.id,
+					propertyKey,
+					args.length ? args : undefined,
+				]
+				this.target.world.room.send("rpc-controller", packet)
 			}
 
 			if (!serverOnly || !this.isClient)

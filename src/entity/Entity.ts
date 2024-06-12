@@ -1,7 +1,7 @@
 import { Schema, type, Vec2 } from "@/schema"
 import { Server } from "@/decorators"
 import { ServerController } from "@/ServerController"
-import { Body } from "detect-collisions"
+import type { Body } from "detect-collisions"
 import { World } from "@/world/World"
 import type { SerializedResponse } from "@/utils/dectect-collisions"
 import { lerp, lerpAngle } from "@/utils/smooth"
@@ -12,6 +12,7 @@ export abstract class Entity<
 > extends Schema<TWorld> {
 	@type(Vec2) pos = new Vec2()
 	@type("float32") rotation = 0
+
 	body: Body | undefined
 	vel = new Vec2()
 	friction = 0.91
@@ -80,7 +81,7 @@ export abstract class Entity<
 	// @Server({ isPrivate: true })
 	@Server()
 	addControllerById(id: number, className: string, options: {}) {
-		const controllerClass = this.controllerRegistry.get(className)
+		const controllerClass = this.world.controllerRegistry.get(className)
 		if (!controllerClass) {
 			throw new Error(`Controller class "${className}" not found!`)
 		}

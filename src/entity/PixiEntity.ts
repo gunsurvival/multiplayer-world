@@ -1,7 +1,6 @@
 import { Container } from "pixi.js"
 import { Entity } from "./Entity"
 import type { PixiWorld } from "../world/PixiWorld"
-import { getZIndexByName } from "@/core/settings"
 import { Client, Server } from "../decorators"
 
 type Test = {
@@ -22,7 +21,7 @@ export abstract class PixiEntity extends Entity<PixiWorld> implements Test {
 				this.display.rotation = options.rotation
 			}
 
-			this.display.zIndex = getZIndexByName(this.constructor.name)
+			// this.display.zIndex = getZIndexByName(this.constructor.name) // TODO: implement getZIndexByName
 		}
 	}
 

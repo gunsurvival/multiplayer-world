@@ -1,13 +1,16 @@
-import { type Application, Text } from "pixi.js"
+import { Application, Text } from "pixi.js"
 import { CasualWorld } from "./CasualWorld"
-import { Camera } from "../../../gunsurvival3/src/core/utils/Camera"
+import { Camera } from "@/utils/pixi/Camera"
+import PIXIViewport from "pixi-viewport"
+import type { Delayed } from "colyseus"
 
 export class PixiWorld extends CasualWorld {
 	app = this.clientOnly(() => new Application())
-	viewport!: Viewport
-	camera!: Camera
-	fpsText!: Text
-	pingText!: Text
+	viewport!: PIXIViewport.Viewport // define later in prepare
+	camera!: Camera // define later in prepare (after viewport is defined)
+	fpsText = this.clientOnly(() => new Text({ text: "FPS: 60" }))
+	pingText = this.clientOnly(() => new Text({ text: "Ping: 0" }))
+
 	lastLatency = 0
 
 	async prepare(options: Parameters<this["init"]>[0]): Promise<void> {
@@ -19,16 +22,14 @@ export class PixiWorld extends CasualWorld {
 		})
 		// @ts-ignore
 		globalThis.__PIXI_APP__ = this.app
-		this.viewport = new Viewport({
+		this.viewport = new PIXIViewport.Viewport({
 			events: this.app.renderer.events,
 			passiveWheel: false,
 			stopPropagation: true,
 		})
 		this.camera = new Camera(this.viewport)
 		this.app.stage.addChild(this.viewport)
-		this.fpsText = new Text({ text: "FPS: 60" })
 		this.fpsText.x = this.app.screen.width - 120
-		this.pingText = new Text({ text: "Ping: 0" })
 		this.pingText.x = this.app.screen.width - 120
 		this.pingText.y = 25
 		this.app.stage.addChild(this.fpsText, this.pingText)

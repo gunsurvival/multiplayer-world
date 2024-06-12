@@ -95,7 +95,7 @@ export function addWorldRecursive(schema: SchemaType, world: World) {
 export function pairClientServer(
 	clientObject: any,
 	serverObject: any,
-	holderMap: Map<string, Schema>
+	holderMap: Map<number, Schema>
 ) {
 	setTimeout(() => {
 		// wait to see if any max exceed error

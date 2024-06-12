@@ -1,4 +1,4 @@
-import { Schema } from "@/lib/multiplayer-world/schema/Schema"
+import { Schema } from "./Schema"
 import { type } from "@colyseus/schema"
 
 export class Vec2 extends Schema {

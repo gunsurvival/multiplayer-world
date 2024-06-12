@@ -1,12 +1,9 @@
-import * as Entities from "@/core/entity"
 import { World } from "./World"
 import { Entity } from "../entity/Entity"
 import {
-	ResponseBodyRefEntity,
+	type ResponseBodyRefEntity,
 	serializeResponse,
-} from "../utils/dectect-collisions"
-
-export type EntityClassKey = keyof typeof Entities
+} from "@/utils/dectect-collisions"
 
 export abstract class CasualWorld extends World {
 	beforeTick(entity: Entity, delta: number) {
@@ -34,6 +31,7 @@ export abstract class CasualWorld extends World {
 		})
 		this.entities.forEach((entity) => {
 			entity.controller?.nextTick(delta)
+			// @ts-ignore  TODO: xoa window.isSync
 			if (this.isClientOnly() && entity.serverState && window.isSync) {
 				entity.reconcileServerState(entity.serverState)
 			}
