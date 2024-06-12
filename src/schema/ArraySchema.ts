@@ -1,8 +1,8 @@
 import { ArraySchema as ColyArraySchema } from "@colyseus/schema"
 
-import { addWorldRecursive } from "../utils/common"
 import type { World } from "../world/World"
 import { Schema } from "./Schema"
+import { addWorldRecursive } from "@/utils/addWorldRecursive"
 
 export class ArraySchema<T = any> extends ColyArraySchema<T> {
 	___: {

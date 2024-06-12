@@ -1,10 +1,11 @@
 import { Schema as ColySchema, type } from "@colyseus/schema"
 
 import type { Client } from "colyseus"
-import { getHandlers, serverHandlersMap } from "../decorators"
+import { getHandlers } from "@/handlers-map"
 import type { World } from "../world/World"
 import { safeGenId } from "../utils/safeGenId"
 import { AsyncEE } from "@/utils/AsyncEE"
+import { RPCPacket } from "../types/RPCPacket"
 
 export class Schema<TWorld extends World = World> extends ColySchema {
 	___: {
@@ -44,7 +45,6 @@ export class Schema<TWorld extends World = World> extends ColySchema {
 					const serverHandler = schema.serverHandlers.get(key)
 
 					if (!serverHandler) {
-						console.log(serverHandlersMap)
 						throw new Error(
 							`Server method "${key}" not found on Schema "${schema.constructor.name}"! Make sure to add @Server() decorator on the method!`
 						)
@@ -52,11 +52,12 @@ export class Schema<TWorld extends World = World> extends ColySchema {
 
 					return (...args: any[]) => {
 						if (schema.___.world.isServerOnly()) {
-							client.send("rpc", {
-								id: schema.id,
-								method: key,
-								args,
-							})
+							const packet: RPCPacket = [
+								schema.id,
+								key,
+								args.length ? args : undefined,
+							]
+							client.send("rpc", packet)
 						}
 
 						return serverHandler.bind(schema)(...args)
@@ -154,7 +155,7 @@ export class Schema<TWorld extends World = World> extends ColySchema {
 				T[EventKey] extends (...args: any) => any ? T[EventKey] : never
 			>
 		) => any
-	) {
+	): () => void {
 		this.clearListeners()
 		return this.addListener(event, listener)
 	}

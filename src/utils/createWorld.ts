@@ -1,5 +1,5 @@
 import type { World, WorldOptions } from "../world/World"
-import { addWorldRecursive } from "./common"
+import { addWorldRecursive } from "./addWorldRecursive"
 
 export function createWorld<
 	WorldClass extends typeof World,

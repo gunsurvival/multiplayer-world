@@ -25,13 +25,13 @@ export abstract class World extends Schema {
 	clientState = {}
 	frameCount = 0
 	entityRegistry = new Map<string, typeof Entity>()
-	controllerRegistry = new Map<string, typeof ServerController>()
+	controllerRegistry = new Map<string, typeof ServerController<Entity>>()
 
 	physics = new System()
 	collisionHashMap = new Map<string, Response>()
 	newCollisionHashMap = new Map<string, Response>()
 
-	constructor({ mode, room, entityClasses }: WorldOptions) {
+	constructor({ mode, room, entityClasses, controllerClasses }: WorldOptions) {
 		super()
 		if (mode === "server") {
 			this.__isServer = true
@@ -61,6 +61,14 @@ export abstract class World extends Schema {
 			Object.entries(entityClasses).forEach(([className, entityClass]) => {
 				this.registerEntityClass(entityClass)
 			})
+		}
+
+		if (controllerClasses) {
+			Object.entries(controllerClasses).forEach(
+				([className, controllerClass]) => {
+					this.registerControllerClass(controllerClass)
+				}
+			)
 		}
 	}
 
@@ -196,7 +204,7 @@ export abstract class World extends Schema {
 		this.entityRegistry.set(entityClass.name, entityClass as typeof Entity)
 	}
 
-	registerControllerClass(controllerClass: typeof ServerController) {
+	registerControllerClass(controllerClass: typeof ServerController<Entity>) {
 		if (this.controllerRegistry.has(controllerClass.name)) {
 			throw new Error(
 				`Controller class "${controllerClass.name}" already exists in world "${this.constructor.name}"!`
@@ -278,9 +286,9 @@ export abstract class World extends Schema {
 
 		const setupRPC = () => {
 			return roomClient.onMessage<RPCPacket>("rpc", async (message) => {
+				console.log("rpc", message)
 				const [id, method, args = []] = message
 				try {
-					// console.log("rpc", message)
 					// TODO: refactor this not to use waitFor, hook on holderMap adding event
 					await waitFor(() => this.__holderMap.has(id), {
 						waitForWhat: `holderMap has ${id}`,
@@ -366,4 +374,5 @@ export type WorldOptions = (
 	  }
 ) & {
 	entityClasses?: Record<string, typeof Entity<World>>
+	controllerClasses?: Record<string, typeof ServerController<Entity>>
 }

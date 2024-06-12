@@ -1,25 +1,9 @@
 {
+	"extends": "@tsconfig/recommended/tsconfig.json",
 	"compilerOptions": {
-		// Enable latest features
-		"lib": ["ESNext", "DOM"],
+		"module": "Esnext",
 		"target": "ESNext",
-		"module": "ESNext",
-		"allowJs": true,
-
-		// Bundler mode
-		"moduleResolution": "bundler",
-		// "verbatimModuleSyntax": true,
-		"noEmit": false,
-
-		// Best practices
-		"strict": true,
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
-
-		// Some stricter flags (disabled by default)
-		"noUnusedLocals": false,
-		"noUnusedParameters": false,
-		"noPropertyAccessFromIndexSignature": false,
+		"moduleResolution": "Bundler",
 
 		// colyseus config
 		"experimentalDecorators": true,
@@ -27,15 +11,17 @@
 
 		// Other
 		"rootDir": "src",
+		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"]
 		},
 		"esModuleInterop": true,
-		"outDir": "./watch",
+		"outDir": "dist",
 		"declaration": true,
 		"declarationMap": true,
-		"sourceMap": true
+		"inlineSourceMap": true
 	},
-	"exclude": ["node_modules", "watch"],
-	"include": ["src/**/*.ts"]
+
+	"include": ["src", "types"],
+	"exclude": ["node_modules", "dist"]
 }

@@ -1,19 +1,33 @@
 import typescript from "rollup-plugin-typescript2"
+import { typescriptPaths } from "rollup-plugin-typescript-paths"
+import { dts } from "rollup-plugin-dts"
+import flatDts from "rollup-plugin-flat-dts"
 
+/** @type {import('rollup').RollupOptions} */
 export default {
 	input: "src/index.ts",
+	preserveModules: true, // indicate not create a single-file
+	preserveModulesRoot: "src", // optional but useful to create a more plain folder structure
 	output: [
 		{
-			file: "dist/bundle.js",
+			dir: "dist",
 			format: "cjs",
 		},
 		{
-			file: "dist/bundle.es.js",
+			dir: "dist",
 			format: "es",
 		},
 	],
-	plugins: [typescript(/*{ plugin options }*/)],
+	plugins: [
+		typescript({
+			declarationDir: "dist/bundle.d.ts",
+			inlineSourceMap: true,
+		}),
+		typescriptPaths(),
+	],
 	external: [
+		"colyseus",
+		"colyseus.js",
 		"@colyseus/schema",
 		"detect-collisions",
 		"pixi.js",

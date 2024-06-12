@@ -1,5 +1,5 @@
 import { Schema } from "./schema"
-import { getHandlers } from "./decorators"
+import { getHandlers } from "@/handlers-map"
 
 export class ServerController<Target extends Schema = Schema> {
 	get controllerHandlers() {

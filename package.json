@@ -1,23 +1,30 @@
 {
   "name": "multiplayer-world",
-  "module": "src/index.ts",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "dev": "tsc -w",
-    "watch-server": "nodemon --watch src -e ts --exec tsx src/server",
-    "watch-test": "nodemon --watch tests -e ts --exec tsx tests/index.test.ts",
-    "checkts": "tsc --noEmit"
+    "start": "rollup -c -w",
+    "build": "rollup -c",
+    "tsc:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@tsconfig/recommended": "^1.0.6",
     "@types/bun": "latest",
+    "concurrently": "^8.2.2",
     "nodemon": "^3.1.3",
     "rollup": "^4.18.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-flat-dts": "^2.6.0",
+    "rollup-plugin-typescript-paths": "^1.5.0",
     "rollup-plugin-typescript2": "^0.36.0",
+    "tsc-alias": "^1.8.10",
     "tslib": "^2.6.3",
-    "tsx": "4.11.2"
+    "tsx": "4.11.2",
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
